@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Style Preview — Polymont</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --red: #E62A20;
+      --dark: #1A1A18;
+      --light-bg: #f7f6f3;
+      --white: #fff;
+    }
+
+    body {
+      background: #080807;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      padding: 48px 32px 64px;
+    }
+
+    .page-header {
+      display: flex; align-items: baseline; gap: 16px;
+      margin-bottom: 40px; padding-bottom: 20px;
+      border-bottom: 1px solid #222;
+    }
+    .page-header h1 { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--red); font-weight: 500; }
+    .page-header p  { font-size: 10px; letter-spacing: 1px; color: #444; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3px;
+    }
+
+    .card {
+      background: #111; border: 1px solid #1e1e1c;
+      overflow: hidden; cursor: pointer; transition: border-color .25s;
+    }
+    .card:hover  { border-color: #444; }
+    .card.active { border-color: var(--red); }
+
+    /* ── Shared hero shell ── */
+    .mock-hero {
+      position: relative; display: flex;
+      height: 280px; overflow: hidden;
+    }
+
+    /* Nav */
+    .mock-nav {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+      height: 38px; background: var(--light-bg);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+    }
+    .mock-logo { height: 16px; width: auto; display: block; }
+    .mock-menu { display: flex; align-items: center; gap: 6px; }
+    .mock-menu-label { font-size: 7px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--dark); }
+    .mock-lines { display: flex; flex-direction: column; gap: 3px; }
+    .mock-lines span { display: block; width: 14px; height: 1.5px; background: var(--dark); }
+
+    /* Panels */
+    .mock-panel {
+      flex: 1; position: relative; overflow: hidden;
+      background-size: cover; background-position: center;
+    }
+    .mock-panel--left  { background-image: url('hero-1.png'); }
+    .mock-panel--right { background-image: url('hero-2.png'); }
+
+    .mock-panel--left  .mock-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to right,  rgba(247,246,243,0.80) 0%, rgba(247,246,243,0.18) 55%, transparent 100%),
+        linear-gradient(to bottom, rgba(247,246,243,0.55) 0%, transparent 55%);
+    }
+    .mock-panel--right .mock-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to left,  rgba(247,246,243,0.82) 0%, rgba(247,246,243,0.18) 55%, transparent 100%),
+        linear-gradient(to top,   rgba(247,246,243,0.65) 0%, transparent 55%);
+    }
+
+    /* Red divider */
+    .mock-divider {
+      position: absolute; left: 50%; top: 38px; bottom: 0;
+      width: 2px; background: var(--red); z-index: 8;
+    }
+
+    /* ── Overflow titles — positioned at hero level ── */
+    .mock-title-wrap {
+      position: absolute; z-index: 10;
+    }
+    .mock-title-wrap--tl { top: 50px; left: 12px; }
+    .mock-title-wrap--br { bottom: 36px; right: 12px; text-align: right; }
+
+    .mock-title {
+      font-size: 28px; font-weight: 700; line-height: 0.92;
+      letter-spacing: -1.2px; text-transform: uppercase;
+      white-space: nowrap; color: var(--white);
+      text-shadow: 0 1px 18px rgba(0,0,0,0.45), 0 0px 4px rgba(0,0,0,0.3);
+      margin-bottom: 8px;
+    }
+
+    /* Bottom labels */
+    .mock-labels {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+      display: flex; justify-content: space-between;
+      padding: 8px 14px;
+      background: rgba(26,26,24,0.06); backdrop-filter: blur(4px);
+    }
+    .mock-labels span { font-size: 6px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(26,26,24,0.55); }
+
+    /* Card footer */
+    .card-footer { padding: 18px 20px 20px; border-top: 1px solid #1e1e1c; background: #0d0d0c; }
+    .style-badge { display: inline-block; font-size: 7px; font-family: monospace; letter-spacing: 2px; text-transform: uppercase; background: var(--red); color: var(--white); padding: 2px 6px; margin-bottom: 8px; }
+    .card.active .style-badge { background: var(--white); color: var(--red); }
+    .style-name { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 5px; }
+    .style-desc { font-size: 11px; color: #666; line-height: 1.6; margin-bottom: 14px; }
+    .style-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tag { font-size: 8px; font-family: monospace; letter-spacing: 1px; text-transform: uppercase; color: #555; border: 1px solid #2a2a28; padding: 3px 7px; }
+    .select-btn {
+      display: block; width: 100%; padding: 9px; background: none;
+      border: 1px solid #2a2a28; color: #555; font-size: 9px;
+      letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all .2s;
+    }
+    .select-btn:hover { border-color: var(--red); color: var(--red); }
+    .card.active .select-btn { background: var(--red); border-color: var(--red); color: var(--white); }
+
+
+    /* ══════════════════════════════════════════════
+       SUBTITLE BOX OPTION 01 — Solid Black
+       Pure #0a0a09 fill, tight padding, no radius.
+       Maximum contrast, no ambiguity.
+    ══════════════════════════════════════════════ */
+    .s1 .subtitle {
+      display: inline-block;
+      background: #0a0a09;
+      color: rgba(255,255,255,0.88);
+      font-size: 7px; font-weight: 400;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 7px;
+    }
+    .s1 .mock-title-wrap--br .subtitle { display: block; text-align: right; }
+
+
+    /* ══════════════════════════════════════════════
+       SUBTITLE BOX OPTION 02 — Brand Dark
+       #1A1A18 fill with a red left accent bar.
+       Ties the subtitle to the brand palette.
+    ══════════════════════════════════════════════ */
+    .s2 .subtitle {
+      display: inline-block;
+      background: var(--dark);
+      color: rgba(255,255,255,0.85);
+      font-size: 7px; font-weight: 400;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 8px 4px 9px;
+      border-left: 2px solid var(--red);
+    }
+    .s2 .mock-title-wrap--br .subtitle {
+      display: block; text-align: right;
+      padding: 4px 9px 4px 8px;
+      border-left: none; border-right: 2px solid var(--red);
+    }
+
+
+    /* ══════════════════════════════════════════════
+       SUBTITLE BOX OPTION 03 — Soft Dark
+       Semi-transparent dark, slight blur. Less
+       abrupt — blends more with the light theme.
+    ══════════════════════════════════════════════ */
+    .s3 .subtitle {
+      display: inline-block;
+      background: rgba(10,10,9,0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: rgba(255,255,255,0.90);
+      font-size: 7px; font-weight: 400;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 5px 8px;
+    }
+    .s3 .mock-title-wrap--br .subtitle { display: block; text-align: right; }
+
+
+    /* ══════════════════════════════════════════════
+       SUBTITLE BOX OPTION 04 — Sentence + Italic
+       Sentence-case italic subtitle, solid dark box.
+       Softer tone — editorial, human, 2026.
+    ══════════════════════════════════════════════ */
+    .s4 .subtitle {
+      display: inline-block;
+      background: #0a0a09;
+      color: rgba(255,255,255,0.80);
+      font-size: 8px; font-weight: 300; font-style: italic;
+      letter-spacing: 0.2px;
+      padding: 4px 8px;
+    }
+    .s4 .mock-title-wrap--br .subtitle { display: block; text-align: right; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Subtitle Box</h1>
+    <p>Frost Blanc · overflow titles · 4 subtitle treatments</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ══ OPTION 01 — SOLID BLACK ══ -->
+    <div class="card s1" id="card-1">
+      <div class="mock-hero">
+        <nav class="mock-nav">
+          <img src="polymont_logo_light.svg" class="mock-logo" alt="Polymont" />
+          <div class="mock-menu">
+            <span class="mock-menu-label">Menu</span>
+            <div class="mock-lines"><span></span><span></span><span></span></div>
+          </div>
+        </nav>
+        <div class="mock-panel mock-panel--left"><div class="mock-overlay"></div></div>
+        <div class="mock-panel mock-panel--right"><div class="mock-overlay"></div></div>
+        <div class="mock-divider"></div>
+        <div class="mock-title-wrap mock-title-wrap--tl">
+          <div class="mock-title">HALOVÉ VESTAVBY</div>
+          <div class="subtitle">příčky a prosklené hliníkové konstrukce</div>
+        </div>
+        <div class="mock-title-wrap mock-title-wrap--br">
+          <div class="mock-title">VRATA A DVEŘE</div>
+          <div class="subtitle">průmyslová, garážová, domovní</div>
+        </div>
+        <div class="mock-labels"><span>Poradenství</span><span>Management</span><span>Řízení</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="style-badge">Option 01</div>
+        <div class="style-name">Solid Black</div>
+        <div class="style-desc">Pure #0a0a09 fill, zero radius, tight padding. Maximum contrast. Clean and unambiguous — the subtitle box is a deliberate functional element.</div>
+        <div class="style-tags"><span class="tag">High contrast</span><span class="tag">Functional</span><span class="tag">Tight</span></div>
+        <button class="select-btn" onclick="select(1)">Select this option</button>
+      </div>
+    </div>
+
+    <!-- ══ OPTION 02 — BRAND DARK + RED BAR ══ -->
+    <div class="card s2" id="card-2">
+      <div class="mock-hero">
+        <nav class="mock-nav">
+          <img src="polymont_logo_light.svg" class="mock-logo" alt="Polymont" />
+          <div class="mock-menu">
+            <span class="mock-menu-label">Menu</span>
+            <div class="mock-lines"><span></span><span></span><span></span></div>
+          </div>
+        </nav>
+        <div class="mock-panel mock-panel--left"><div class="mock-overlay"></div></div>
+        <div class="mock-panel mock-panel--right"><div class="mock-overlay"></div></div>
+        <div class="mock-divider"></div>
+        <div class="mock-title-wrap mock-title-wrap--tl">
+          <div class="mock-title">HALOVÉ VESTAVBY</div>
+          <div class="subtitle">příčky a prosklené hliníkové konstrukce</div>
+        </div>
+        <div class="mock-title-wrap mock-title-wrap--br">
+          <div class="mock-title">VRATA A DVEŘE</div>
+          <div class="subtitle">průmyslová, garážová, domovní</div>
+        </div>
+        <div class="mock-labels"><span>Poradenství</span><span>Management</span><span>Řízení</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="style-badge">Option 02</div>
+        <div class="style-name">Brand + Bar</div>
+        <div class="style-desc">Brand dark (#1A1A18) fill with a red left/right border. The subtitle box echoes the vertical red divider — everything feels intentional.</div>
+        <div class="style-tags"><span class="tag">Brand dark</span><span class="tag">Red accent</span><span class="tag">Cohesive</span></div>
+        <button class="select-btn" onclick="select(2)">Select this option</button>
+      </div>
+    </div>
+
+    <!-- ══ OPTION 03 — SOFT DARK ══ -->
+    <div class="card s3" id="card-3">
+      <div class="mock-hero">
+        <nav class="mock-nav">
+          <img src="polymont_logo_light.svg" class="mock-logo" alt="Polymont" />
+          <div class="mock-menu">
+            <span class="mock-menu-label">Menu</span>
+            <div class="mock-lines"><span></span><span></span><span></span></div>
+          </div>
+        </nav>
+        <div class="mock-panel mock-panel--left"><div class="mock-overlay"></div></div>
+        <div class="mock-panel mock-panel--right"><div class="mock-overlay"></div></div>
+        <div class="mock-divider"></div>
+        <div class="mock-title-wrap mock-title-wrap--tl">
+          <div class="mock-title">HALOVÉ VESTAVBY</div>
+          <div class="subtitle">příčky a prosklené hliníkové konstrukce</div>
+        </div>
+        <div class="mock-title-wrap mock-title-wrap--br">
+          <div class="mock-title">VRATA A DVEŘE</div>
+          <div class="subtitle">průmyslová, garážová, domovní</div>
+        </div>
+        <div class="mock-labels"><span>Poradenství</span><span>Management</span><span>Řízení</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="style-badge">Option 03</div>
+        <div class="style-name">Soft Dark</div>
+        <div class="style-desc">Semi-transparent dark with a subtle backdrop blur. Less stark than pure black — the box feels part of the image rather than placed on top of it.</div>
+        <div class="style-tags"><span class="tag">Semi-transparent</span><span class="tag">Blur</span><span class="tag">Integrated</span></div>
+        <button class="select-btn" onclick="select(3)">Select this option</button>
+      </div>
+    </div>
+
+    <!-- ══ OPTION 04 — EDITORIAL ITALIC ══ -->
+    <div class="card s4" id="card-4">
+      <div class="mock-hero">
+        <nav class="mock-nav">
+          <img src="polymont_logo_light.svg" class="mock-logo" alt="Polymont" />
+          <div class="mock-menu">
+            <span class="mock-menu-label">Menu</span>
+            <div class="mock-lines"><span></span><span></span><span></span></div>
+          </div>
+        </nav>
+        <div class="mock-panel mock-panel--left"><div class="mock-overlay"></div></div>
+        <div class="mock-panel mock-panel--right"><div class="mock-overlay"></div></div>
+        <div class="mock-divider"></div>
+        <div class="mock-title-wrap mock-title-wrap--tl">
+          <div class="mock-title">HALOVÉ VESTAVBY</div>
+          <div class="subtitle">příčky a prosklené hliníkové konstrukce</div>
+        </div>
+        <div class="mock-title-wrap mock-title-wrap--br">
+          <div class="mock-title">VRATA A DVEŘE</div>
+          <div class="subtitle">průmyslová, garážová, domovní</div>
+        </div>
+        <div class="mock-labels"><span>Poradenství</span><span>Management</span><span>Řízení</span></div>
+      </div>
+      <div class="card-footer">
+        <div class="style-badge">Option 04</div>
+        <div class="style-name">Italic</div>
+        <div class="style-desc">Black box, sentence-case italic subtitle. The italic weight contrasts with the bold uppercase title — premium editorial tone, very 2026.</div>
+        <div class="style-tags"><span class="tag">Italic</span><span class="tag">Sentence case</span><span class="tag">Editorial</span></div>
+        <button class="select-btn" onclick="select(4)">Select this option</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function select(n) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+      document.getElementById('card-' + n).classList.add('active');
+    }
+  </script>
+</body>
+</html>

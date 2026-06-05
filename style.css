@@ -2792,7 +2792,7 @@ body {
 
 .ab-hall__photos {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 2px;
 }
 
@@ -2803,7 +2803,7 @@ body {
 
 .ab-hall__photo--large {
   aspect-ratio: 16 / 9;
-  grid-row: 1;
+  grid-row: auto;
 }
 
 .ab-hall__photo img {

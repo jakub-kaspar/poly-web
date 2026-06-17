@@ -3372,6 +3372,11 @@ body {
   color: rgba(26,26,24,0.42) !important;
   font-style: italic;
 }
+.ct-accordion__list-note a {
+  color: var(--dark) !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 /* ─── FILE UPLOAD ───────────────────────────────────────── */
 

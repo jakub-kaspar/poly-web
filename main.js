@@ -123,43 +123,8 @@ document.querySelectorAll('.hero__panel').forEach(panel => {
 const yearEl = document.getElementById('footer-year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-// ── References data ───────────────────────────────────────────────────────────
-const REFS = [
-  // Vestavby — quality 5
-  { src: 'references_graded/P1010060.jpg',            cat: 'vestavby' },
-  { src: 'references_graded/P1010067.jpg',            cat: 'vestavby' },
-  { src: 'references_graded/P1010087.jpg',            cat: 'vestavby' },
-  // Vrata — quality 5
-  { src: 'references_graded/IMG-20230811-WA0007.jpg', cat: 'vrata' },
-  { src: 'references_graded/IMG-20230811-WA0011.jpg', cat: 'vrata' },
-  { src: 'references_graded/op\u00d822.png',          cat: 'vrata' },
-  // Vestavby — quality 4
-  { src: 'references_graded/Mezanin 1.jpg',           cat: 'vestavby' },
-  { src: 'references_graded/Mezanin 3.jpg',           cat: 'vestavby' },
-  { src: 'references_graded/IMG_8398-1024x683.jpg',   cat: 'vestavby' },
-  { src: 'references_graded/IMG-20260115-WA0001.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG-20260115-WA0007.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG-20260115-WA0012.jpg', cat: 'vestavby' },
-  { src: 'references_graded/20210824_130330.jpg',     cat: 'vestavby' },
-  { src: 'references_graded/20210824_131903.jpg',     cat: 'vestavby' },
-  { src: 'references_graded/IMG_20220113_190926.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG_20220113_190942.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG_20250318_120659.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG_20250318_164952.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG-20221026-WA0004.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG-20240404-WA0003.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG-20250424-WA0009.jpg', cat: 'vestavby' },
-  { src: 'references_graded/IMG-20250424-WA0010.jpg', cat: 'vestavby' },
-  { src: 'references_graded/djddj.jpg',               cat: 'vestavby' },
-  // Vrata — quality 4
-  { src: 'references_graded/DSCN1422-1024x683.jpg',   cat: 'vrata' },
-  { src: 'references_graded/garazova-1-1.jpg',         cat: 'vrata' },
-  { src: 'references_graded/IMG-20210413-WA0005.jpg',  cat: 'vrata' },
-  { src: 'references_graded/IMG-20231010-WA0015.jpg',  cat: 'vrata' },
-  { src: 'references_graded/IMG-20231010-WA0020.jpg',  cat: 'vrata' },
-  { src: 'references_graded/IMG-20231010-WA0022.jpg',  cat: 'vrata' },
-  { src: 'references_graded/bcvf.jpg',                 cat: 'vrata' },
-];
+// ── References — loaded from _data/references.json (managed via Decap CMS) ───
+let REFS = [];
 
 const PER_PAGE = 8;
 let refsFilter = 'all';
@@ -184,9 +149,10 @@ function renderRefs() {
   // Grid
   grid.innerHTML = slice.map(r => {
     const label = r.cat === 'vestavby' ? 'Vestavby' : 'Vrata a dveře';
+    const alt   = r.alt || label;
     return `<div class="refs__item" data-category="${r.cat}">
       <div class="refs__img-wrap">
-        <img src="${r.src}" alt="${label}" loading="lazy"
+        <img src="${r.src}" alt="${alt}" loading="lazy"
              onerror="this.closest('.refs__img-wrap').classList.add('refs__img-wrap--placeholder');this.style.display='none'" />
       </div>
       <p class="refs__item-label">${label}</p>
@@ -212,6 +178,21 @@ function renderRefs() {
   });
 }
 
+// Fetch references from CMS data file, fall back gracefully
+if (document.getElementById('refs-grid')) {
+  fetch('_data/references.json')
+    .then(r => r.json())
+    .then(data => {
+      // Decap CMS wraps list collections in { items: [...] }
+      REFS = Array.isArray(data) ? data : (data.items || []);
+      renderRefs();
+    })
+    .catch(() => {
+      console.warn('Could not load _data/references.json — gallery empty.');
+      renderRefs();
+    });
+}
+
 // ── References filter ────────────────────────────────────────────────────────
 document.querySelectorAll('.refs__chip').forEach(chip => {
   chip.addEventListener('click', () => {
@@ -224,8 +205,6 @@ document.querySelectorAll('.refs__chip').forEach(chip => {
     renderRefs();
   });
 });
-
-renderRefs();
 
 // ── Lightbox ──────────────────────────────────────────────────────────────────
 const lb       = document.getElementById('lightbox');

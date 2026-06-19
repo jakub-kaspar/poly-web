@@ -1,0 +1,100 @@
+# Decap CMS — Polymont s.r.o.
+# Docs: https://decapcms.org/docs/
+
+backend:
+  name: github
+  repo: YOUR_GITHUB_USERNAME/YOUR_REPO_NAME   # ← update before deploying
+  branch: main
+
+# Enables the CMS to run locally without GitHub auth
+# Run: npx decap-server  (in the project root)
+local_backend: true
+
+# Where uploaded media goes
+media_folder: "references_graded"
+public_folder: "references_graded"
+
+# ─── Collections ──────────────────────────────────────────────────────────────
+collections:
+
+  # ── Reference gallery ───────────────────────────────────────────────────────
+  - name: "references"
+    label: "Reference (galerie)"
+    label_singular: "Referenční foto"
+    description: "Fotografie realizovaných projektů zobrazené v galerii na úvodní stránce."
+    files:
+      - name: "gallery"
+        label: "Seznam fotek"
+        file: "_data/references.json"
+        fields:
+          - name: items
+            label: Fotografie
+            widget: list
+            summary: "{{fields.src}} ({{fields.cat}})"
+            fields:
+              - label: "Soubor"
+                name: src
+                widget: image
+                media_folder: "/references_graded"
+                public_folder: "references_graded"
+                hint: "Vyberte nebo nahrajte fotografii z galerie references_graded/"
+              - label: "Kategorie"
+                name: cat
+                widget: select
+                options:
+                  - { label: "Halové vestavby", value: "vestavby" }
+                  - { label: "Vrata a dveře",   value: "vrata" }
+              - label: "Popis (alt text)"
+                name: alt
+                widget: string
+                required: false
+                hint: "Krátký popis fotografie pro přístupnost (nepovinné)"
+
+  # ── Nastavení webu ──────────────────────────────────────────────────────────
+  - name: "settings"
+    label: "Nastavení"
+    files:
+
+      - name: "contact"
+        label: "Kontaktní údaje"
+        description: "Telefon, e-mail, adresa a provozní doba. Změny se projeví po aktualizaci webu."
+        file: "_data/settings.json"
+        fields:
+          - label: "Název firmy"
+            name: company
+            widget: string
+          - label: "IČO"
+            name: ico
+            widget: string
+          - label: "Ulice a číslo"
+            name: address_street
+            widget: string
+          - label: "Město"
+            name: address_city
+            widget: string
+          - label: "PSČ"
+            name: address_zip
+            widget: string
+          - label: "Telefon (zobrazený)"
+            name: phone
+            widget: string
+            hint: "Např. 327 523 268"
+          - label: "Telefon (odkaz href)"
+            name: phone_href
+            widget: string
+            hint: "Např. +420327523268 — bez mezer, s předvolbou"
+          - label: "E-mail"
+            name: email
+            widget: string
+          - label: "URL Google Maps"
+            name: maps_url
+            widget: string
+            hint: "Zkrácený odkaz z Google Maps na provozovnu"
+          - label: "Provozní doba"
+            name: hours
+            widget: string
+            hint: "Např. Po–Pá 7:00–16:00"
+          - label: "Čas odpovědi na e-mail"
+            name: email_response
+            widget: string
+            hint: "Např. Odpovídáme do 24 hodin"

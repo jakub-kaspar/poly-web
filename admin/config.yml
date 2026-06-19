@@ -3,7 +3,7 @@
 
 backend:
   name: github
-  repo: poly-web
+  repo: jakub-kaspar/poly-web
   branch: main
 
 # Enables the CMS to run locally without GitHub auth
